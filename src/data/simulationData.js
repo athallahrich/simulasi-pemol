@@ -1,0 +1,485 @@
+// Simulation data based on CHAIN_Pemol material
+// BCA - Pembukaan Rekening Online
+
+export const customerScenarios = [
+  {
+    id: 1,
+    title: "Nasabah Baru - KTP Lolos KYC",
+    description: "Nasabah baru ingin membuka rekening melalui myBCA. KTP sudah lolos KYC sistem.",
+    channel: "myBCA",
+    kycStatus: "lolos", // "lolos" or "normal"
+    customerType: "baru", // baru, existing_baru, existing
+    isNRT: false,
+    isHistoriTolak: false,
+    customer: {
+      nik: "3174012345678901",
+      nama: "Andi Pratama",
+      tempatLahir: "Jakarta",
+      tanggalLahir: "15-03-1990",
+      alamat: "Jl. Sudirman No. 45, Jakarta Selatan",
+      pekerjaan: "Karyawan Swasta",
+      namaPerusahaan: "PT Maju Bersama",
+      namaGadisIbuKandung: "Siti Rahayu",
+      npwp: "12.345.678.9-012.345",
+      noHP: "081234567890",
+      email: "andi.pratama@email.com",
+    },
+    dukcapilData: {
+      nik: "3174012345678901",
+      nama: "Andi Pratama",
+      tempatLahir: "Jakarta",
+      tanggalLahir: "15-03-1990",
+      alamat: "Jl. Sudirman No. 45, Jakarta Selatan",
+      pekerjaan: "Karyawan Swasta",
+      statusKawin: "Belum Kawin",
+      agama: "Islam",
+      kewarganegaraan: "WNI",
+    },
+    cisResult: "not_found", // not_found, found_existing, found_with_rekening
+    conversationFlow: [
+      {
+        step: "incoming_call",
+        customerMessage: "Halo, selamat siang. Saya ingin membuka rekening BCA. Saya sudah daftar lewat myBCA.",
+        customerQuestions: [
+          "Kira-kira berapa lama proses pembukaan rekeningnya?",
+          "Apakah ada biaya untuk pembukaan rekening?",
+          "Apa saja syarat yang diperlukan?",
+        ],
+        correctActions: [
+          { id: "a1", text: "Sapa nasabah dan konfirmasi tujuan pembukaan rekening", isCorrect: true },
+          { id: "a2", text: "Langsung minta NIK tanpa sapaan", isCorrect: false },
+          { id: "a3", text: "Minta nasabah menunggu tanpa penjelasan", isCorrect: false },
+        ],
+      },
+      {
+        step: "ringkasan_panggilan",
+        customerMessage: "Iya, saya sudah melakukan pendaftaran di aplikasi myBCA kemarin.",
+        systemInfo: "Channel: myBCA | KTP Lolos KYC: YA",
+        correctActions: [
+          { id: "b1", text: "Capture layar video call dan periksa history panggilan terputus", isCorrect: true },
+          { id: "b2", text: "Abaikan capture dan langsung lanjut ke verifikasi", isCorrect: false },
+          { id: "b3", text: "Minta nasabah mengirim foto selfie melalui chat", isCorrect: false },
+        ],
+      },
+      {
+        step: "kyc_check",
+        customerMessage: "",
+        systemInfo: "Status KYC: KTP LOLOS KYC - Lakukan KYC Singkat",
+        kycQuestions: [
+          "Apakah Anda yang membuka rekening ini?",
+          "Apakah Anda bersedia melakukan pembukaan rekening melalui video call?",
+        ],
+        correctActions: [
+          { id: "c1", text: "Lakukan KYC Singkat karena KTP sudah lolos KYC sistem", isCorrect: true },
+          { id: "c2", text: "Lakukan KYC Normal dengan pertanyaan lengkap", isCorrect: false },
+          { id: "c3", text: "Skip KYC karena sudah lolos sistem", isCorrect: false },
+        ],
+      },
+      {
+        step: "verifikasi_identitas",
+        customerMessage: "Iya benar, saya mau buka rekening. Ini KTP saya sudah siap.",
+        customerQuestions: [
+          "Kenapa harus verifikasi pakai video call?",
+          "Data saya aman kan?",
+        ],
+        correctActions: [
+          { id: "d1", text: "Search NIK di Webportal Dukcapil dan bandingkan foto KTP, dukcapil, dan Pre-DIN", isCorrect: true },
+          { id: "d2", text: "Hanya cek foto KTP tanpa membandingkan dengan dukcapil", isCorrect: false },
+          { id: "d3", text: "Langsung centang semua verifikasi tanpa memeriksa", isCorrect: false },
+        ],
+        verificationChecklist: [
+          "Foto identitas KTP sesuai dengan nasabah video call",
+          "Foto dukcapil sesuai dengan nasabah",
+          "Foto Pre-DIN sesuai dengan nasabah",
+          "Tandatangan sesuai dengan identitas",
+        ],
+      },
+      {
+        step: "konfirmasi_data",
+        customerMessage: "Iya, data saya sudah benar semua.",
+        staticData: ["Nama: Andi Pratama", "TTL: Jakarta, 15-03-1990"],
+        dynamicData: ["Pekerjaan: Karyawan Swasta", "Perusahaan: PT Maju Bersama"],
+        correctActions: [
+          { id: "e1", text: "Konfirmasi data statis (Nama, TTL) dan data dinamis (Pekerjaan) ke nasabah", isCorrect: true },
+          { id: "e2", text: "Hanya konfirmasi data statis saja", isCorrect: false },
+          { id: "e3", text: "Anggap data sudah benar tanpa konfirmasi ke nasabah", isCorrect: false },
+        ],
+      },
+      {
+        step: "search_cis",
+        customerMessage: "Saya belum pernah punya rekening BCA sebelumnya.",
+        customerType: "baru",
+        correctActions: [
+          { id: "f1", text: "Pilih 'Nasabah Baru' karena tidak ditemukan CIS existing", isCorrect: true },
+          { id: "f2", text: "Pilih CIS existing yang nama mirip", isCorrect: false },
+          { id: "f3", text: "Buat CIS baru tanpa verifikasi terlebih dahulu", isCorrect: false },
+        ],
+      },
+      {
+        step: "konfirmasi_nasabah",
+        customerMessage: "Nama gadis ibu kandung saya Siti Rahayu.",
+        customerQuestions: [
+          "Untuk apa data ibu kandung diperlukan?",
+          "Apakah data ini akan disimpan aman?",
+        ],
+        correctActions: [
+          { id: "g1", text: "Konfirmasi nama gadis ibu kandung dan pastikan pengisian sudah benar", isCorrect: true },
+          { id: "g2", text: "Isi nama gadis ibu kandung asal-asalan", isCorrect: false },
+          { id: "g3", text: "Skip field nama gadis ibu kandung", isCorrect: false },
+        ],
+      },
+      {
+        step: "submit_spv",
+        customerMessage: "Baik, saya tunggu prosesnya ya.",
+        correctActions: [
+          { id: "h1", text: "Submit data ke Supervisor untuk approval", isCorrect: true },
+          { id: "h2", text: "Langsung create rekening tanpa approval SPV", isCorrect: false },
+          { id: "h3", text: "Minta nasabah telepon ulang besok", isCorrect: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "Nasabah Existing - Pengisian Baru",
+    description: "Nasabah sudah punya rekening BCA tapi mengisi data sebagai nasabah baru. Perlu diverifikasi CIS existing.",
+    channel: "BCA Mobile",
+    kycStatus: "normal",
+    customerType: "existing_baru",
+    isNRT: false,
+    isHistoriTolak: false,
+    customer: {
+      nik: "3273056789012345",
+      nama: "Budi Santoso",
+      tempatLahir: "Bandung",
+      tanggalLahir: "22-07-1985",
+      alamat: "Jl. Asia Afrika No. 100, Bandung",
+      pekerjaan: "Wiraswasta",
+      namaPerusahaan: "Toko Budi Jaya",
+      namaGadisIbuKandung: "Maria Susanti",
+      npwp: "",
+      noHP: "085678901234",
+      email: "budi.santoso@email.com",
+      existingRekening: "1234567890",
+    },
+    dukcapilData: {
+      nik: "3273056789012345",
+      nama: "Budi Santoso",
+      tempatLahir: "Bandung",
+      tanggalLahir: "22-07-1985",
+      alamat: "Jl. Asia Afrika No. 100, Bandung",
+      pekerjaan: "Wiraswasta",
+      statusKawin: "Kawin",
+      agama: "Kristen",
+      kewarganegaraan: "WNI",
+    },
+    cisResult: "found_existing",
+    existingCIS: {
+      noRekening: "1234567890",
+      produk: ["Tahapan BCA", "Kartu Debit Paspor BCA"],
+      statusRekening: "Aktif",
+    },
+    verificationQuestions: {
+      group1: [
+        { q: "Apa produk deposit yang Anda miliki?", a: "Tahapan BCA" },
+        { q: "Kapan terakhir kali Anda bertransaksi?", a: "Minggu lalu" },
+        { q: "Berapa saldo rata-rata rekening Anda?", a: "Sekitar 10 juta" },
+      ],
+      group2: [
+        { q: "Apakah Anda memiliki kartu kredit BCA?", a: "Tidak" },
+        { q: "Kapan Anda membuka rekening pertama kali?", a: "Tahun 2020" },
+        { q: "Apa jenis kartu debit yang Anda miliki?", a: "Paspor BCA" },
+      ],
+    },
+    conversationFlow: [
+      {
+        step: "incoming_call",
+        customerMessage: "Selamat siang, saya mau buka rekening baru. Saya sebenarnya sudah punya rekening BCA tapi mau buka yang baru.",
+        customerQuestions: [
+          "Apakah rekening lama saya akan terpengaruh?",
+          "Bisa nggak buka rekening kedua lewat online?",
+          "Apa bedanya dengan rekening saya yang sekarang?",
+        ],
+        correctActions: [
+          { id: "a1", text: "Sapa nasabah dan konfirmasi bahwa nasabah ingin buka rekening tambahan", isCorrect: true },
+          { id: "a2", text: "Suruh nasabah ke cabang saja karena sudah punya rekening", isCorrect: false },
+          { id: "a3", text: "Abaikan info rekening existing dan proses sebagai nasabah baru", isCorrect: false },
+        ],
+      },
+      {
+        step: "ringkasan_panggilan",
+        customerMessage: "Saya daftar lewat BCA Mobile.",
+        systemInfo: "Channel: BCA Mobile | KTP Lolos KYC: TIDAK",
+        correctActions: [
+          { id: "b1", text: "Capture layar video call dan periksa history panggilan terputus", isCorrect: true },
+          { id: "b2", text: "Skip capture dan abaikan history", isCorrect: false },
+          { id: "b3", text: "Langsung ke KYC tanpa cek ringkasan", isCorrect: false },
+        ],
+      },
+      {
+        step: "kyc_check",
+        customerMessage: "",
+        systemInfo: "Status KYC: TIDAK LOLOS - Lakukan KYC Normal",
+        kycQuestions: [
+          "Apakah Anda yang membuka rekening ini?",
+          "Apakah Anda bersedia melakukan pembukaan rekening melalui video call?",
+          "Sebutkan nama lengkap Anda sesuai KTP?",
+          "Apa pekerjaan Anda saat ini?",
+          "Di mana alamat tempat tinggal Anda sekarang?",
+        ],
+        correctActions: [
+          { id: "c1", text: "Lakukan KYC Normal karena KTP tidak lolos KYC sistem", isCorrect: true },
+          { id: "c2", text: "Lakukan KYC Singkat saja", isCorrect: false },
+          { id: "c3", text: "Skip KYC karena nasabah sudah existing", isCorrect: false },
+        ],
+      },
+      {
+        step: "verifikasi_identitas",
+        customerMessage: "Ini KTP saya, silakan dicek.",
+        customerQuestions: [
+          "Foto saya di KTP memang agak beda, sudah lama soalnya.",
+          "Apakah harus persis sama fotonya?",
+        ],
+        correctActions: [
+          { id: "d1", text: "Search NIK di Dukcapil, bandingkan semua foto, dan pastikan identitas sesuai", isCorrect: true },
+          { id: "d2", text: "Hanya verifikasi dari foto KTP saja", isCorrect: false },
+          { id: "d3", text: "Tidak perlu verifikasi karena nasabah sudah existing", isCorrect: false },
+        ],
+        verificationChecklist: [
+          "Foto identitas KTP sesuai dengan nasabah video call",
+          "Foto dukcapil sesuai dengan nasabah",
+          "Foto Pre-DIN sesuai dengan nasabah",
+          "Tandatangan sesuai dengan identitas",
+        ],
+      },
+      {
+        step: "konfirmasi_data",
+        customerMessage: "Iya data saya benar, tapi sekarang saya wiraswasta punya toko sendiri.",
+        staticData: ["Nama: Budi Santoso", "TTL: Bandung, 22-07-1985"],
+        dynamicData: ["Pekerjaan: Wiraswasta", "Usaha: Toko Budi Jaya"],
+        correctActions: [
+          { id: "e1", text: "Konfirmasi data statis dan dinamis, bandingkan dengan data dukcapil", isCorrect: true },
+          { id: "e2", text: "Konfirmasi hanya data statis", isCorrect: false },
+          { id: "e3", text: "Tidak perlu konfirmasi, data sudah ada di sistem", isCorrect: false },
+        ],
+      },
+      {
+        step: "search_cis",
+        customerMessage: "Oh iya, saya sudah punya rekening BCA sebelumnya. Nomor rekeningnya 1234567890.",
+        customerType: "existing",
+        correctActions: [
+          { id: "f1", text: "Verifikasi CIS existing dan tanyakan apakah nasabah sudah pernah punya rekening", isCorrect: true },
+          { id: "f2", text: "Buat CIS baru karena ini pembukaan rekening baru", isCorrect: false },
+          { id: "f3", text: "Abaikan CIS existing dan proses sebagai nasabah baru", isCorrect: false },
+        ],
+        verificationQuestions: {
+          group1: "Pilih 1 dari 3 pertanyaan untuk verifikasi kelompok 1",
+          group2: "Pilih 1 dari 3 pertanyaan untuk verifikasi kelompok 2",
+        },
+      },
+      {
+        step: "konfirmasi_nasabah",
+        customerMessage: "Nama gadis ibu saya Maria Susanti.",
+        customerQuestions: [
+          "Kenapa harus tanya nama ibu kandung?",
+        ],
+        correctActions: [
+          { id: "g1", text: "Konfirmasi nama gadis ibu kandung dan data lainnya", isCorrect: true },
+          { id: "g2", text: "Skip karena data sudah ada di CIS existing", isCorrect: false },
+          { id: "g3", text: "Isi otomatis tanpa konfirmasi", isCorrect: false },
+        ],
+      },
+      {
+        step: "submit_spv",
+        customerMessage: "Baik, silakan diproses ya.",
+        correctActions: [
+          { id: "h1", text: "Submit ke SPV untuk approval pembukaan rekening 2nd account", isCorrect: true },
+          { id: "h2", text: "Langsung approve karena nasabah existing", isCorrect: false },
+          { id: "h3", text: "Tolak karena nasabah sudah punya rekening", isCorrect: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Nasabah NRT (Nasabah Resiko Tinggi)",
+    description: "Nasabah baru yang terdaftar sebagai NRT. Perlu pertanyaan EDD tambahan.",
+    channel: "bca.co.id",
+    kycStatus: "lolos",
+    customerType: "baru",
+    isNRT: true,
+    isHistoriTolak: false,
+    customer: {
+      nik: "3171098765432109",
+      nama: "Carlos Wijaya",
+      tempatLahir: "Surabaya",
+      tanggalLahir: "10-11-1978",
+      alamat: "Jl. HR Rasuna Said Kav. 5, Jakarta Selatan",
+      pekerjaan: "Direktur",
+      namaPerusahaan: "PT Global International",
+      namaGadisIbuKandung: "Lim Mei Hua",
+      npwp: "98.765.432.1-012.345",
+      noHP: "081987654321",
+      email: "carlos.wijaya@email.com",
+    },
+    dukcapilData: {
+      nik: "3171098765432109",
+      nama: "Carlos Wijaya",
+      tempatLahir: "Surabaya",
+      tanggalLahir: "10-11-1978",
+      alamat: "Jl. HR Rasuna Said Kav. 5, Jakarta Selatan",
+      pekerjaan: "Direktur",
+      statusKawin: "Kawin",
+      agama: "Buddha",
+      kewarganegaraan: "WNI",
+    },
+    nrtData: {
+      alasanRisikoTinggi: "Politically Exposed Person (PEP)",
+      lamaTinggal: "10 tahun",
+      rekeningBankLain: "Ya - Bank Mandiri, Bank CIMB",
+      hubunganLuarNegeri: "Ya - Singapore, Malaysia",
+      sumberKekayaan: "Hasil usaha bisnis ekspor-impor",
+    },
+    cisResult: "not_found",
+    conversationFlow: [
+      {
+        step: "incoming_call",
+        customerMessage: "Halo, saya ingin membuka rekening BCA. Saya daftar dari website bca.co.id.",
+        customerQuestions: [
+          "Saya butuh rekening untuk bisnis internasional saya.",
+          "Apakah ada limit transaksi untuk rekening ini?",
+          "Bisa untuk transfer ke luar negeri?",
+        ],
+        correctActions: [
+          { id: "a1", text: "Sapa nasabah dan konfirmasi tujuan pembukaan rekening", isCorrect: true },
+          { id: "a2", text: "Tolak karena bisnis internasional berisiko", isCorrect: false },
+          { id: "a3", text: "Abaikan info bisnis dan langsung proses", isCorrect: false },
+        ],
+      },
+      {
+        step: "ringkasan_panggilan",
+        customerMessage: "Iya, saya dari website.",
+        systemInfo: "Channel: bca.co.id (pihak ketiga) | KTP Lolos KYC: YA",
+        correctActions: [
+          { id: "b1", text: "Capture layar video call dan periksa history panggilan terputus", isCorrect: true },
+          { id: "b2", text: "Skip capture", isCorrect: false },
+          { id: "b3", text: "Langsung lanjut tanpa periksa history", isCorrect: false },
+        ],
+      },
+      {
+        step: "kyc_check",
+        customerMessage: "",
+        systemInfo: "Status KYC: KTP LOLOS KYC - Lakukan KYC Singkat | PERHATIAN: Nasabah terdaftar NRT!",
+        kycQuestions: [
+          "Apakah Anda yang membuka rekening ini?",
+          "Apakah Anda bersedia melakukan pembukaan rekening melalui video call?",
+        ],
+        correctActions: [
+          { id: "c1", text: "Lakukan KYC Singkat dan persiapkan pertanyaan EDD karena nasabah NRT", isCorrect: true },
+          { id: "c2", text: "Lakukan KYC Singkat saja tanpa EDD", isCorrect: false },
+          { id: "c3", text: "Tolak nasabah karena NRT", isCorrect: false },
+        ],
+      },
+      {
+        step: "verifikasi_identitas",
+        customerMessage: "Silakan, ini KTP saya. Saya juga punya NPWP.",
+        customerQuestions: [
+          "Apakah NRT itu? Saya kok disebut risiko tinggi?",
+          "Saya pengusaha, wajar kan punya banyak relasi internasional?",
+        ],
+        correctActions: [
+          { id: "d1", text: "Search NIK di Dukcapil, verifikasi semua foto, dan periksa status NRT nasabah", isCorrect: true },
+          { id: "d2", text: "Verifikasi KTP tanpa cek NRT", isCorrect: false },
+          { id: "d3", text: "Abaikan status NRT karena KTP sudah lolos", isCorrect: false },
+        ],
+        verificationChecklist: [
+          "Foto identitas KTP sesuai dengan nasabah video call",
+          "Foto dukcapil sesuai dengan nasabah",
+          "Foto Pre-DIN sesuai dengan nasabah",
+          "Tandatangan sesuai dengan identitas",
+          "NPWP ada dan sesuai",
+        ],
+      },
+      {
+        step: "konfirmasi_data",
+        customerMessage: "Data saya benar semua.",
+        staticData: ["Nama: Carlos Wijaya", "TTL: Surabaya, 10-11-1978"],
+        dynamicData: ["Pekerjaan: Direktur", "Perusahaan: PT Global International"],
+        correctActions: [
+          { id: "e1", text: "Konfirmasi data statis dan dinamis, siapkan EDD karena NRT", isCorrect: true },
+          { id: "e2", text: "Konfirmasi data statis saja", isCorrect: false },
+          { id: "e3", text: "Langsung skip ke step berikutnya", isCorrect: false },
+        ],
+      },
+      {
+        step: "search_cis",
+        customerMessage: "Belum pernah punya rekening BCA.",
+        customerType: "baru",
+        correctActions: [
+          { id: "f1", text: "Pilih 'Nasabah Baru' karena tidak ditemukan CIS existing", isCorrect: true },
+          { id: "f2", text: "Buat CIS tanpa verifikasi", isCorrect: false },
+          { id: "f3", text: "Cari CIS yang mirip namanya", isCorrect: false },
+        ],
+      },
+      {
+        step: "konfirmasi_nasabah_edd",
+        customerMessage: "Iya, saya akan jawab pertanyaan EDD-nya.",
+        customerQuestions: [
+          "Kenapa pertanyaannya lebih banyak dari orang lain?",
+          "Data EDD ini untuk apa?",
+          "Apakah ini standar untuk semua nasabah?",
+          "Hubungan bisnis saya dengan luar negeri itu legal kok.",
+        ],
+        eddFields: [
+          { label: "Alasan Risiko Tinggi", answer: "Politically Exposed Person (PEP)" },
+          { label: "Lama tinggal di alamat terakhir", answer: "10 tahun" },
+          { label: "Rekening/kartu kredit di bank lain", answer: "Ya - Bank Mandiri, Bank CIMB" },
+          { label: "Hubungan usaha dengan luar negeri", answer: "Ya - Singapore, Malaysia" },
+          { label: "Sumber kekayaan", answer: "Hasil usaha bisnis ekspor-impor" },
+        ],
+        correctActions: [
+          { id: "g1", text: "Lengkapi semua field EDD: alasan risiko, lama tinggal, bank lain, hubungan LN, sumber kekayaan", isCorrect: true },
+          { id: "g2", text: "Hanya isi alasan risiko tinggi saja", isCorrect: false },
+          { id: "g3", text: "Skip EDD karena nasabah sudah kooperatif", isCorrect: false },
+        ],
+      },
+      {
+        step: "submit_spv",
+        customerMessage: "Baik, saya mengerti prosedurnya. Silakan diproses.",
+        correctActions: [
+          { id: "h1", text: "Submit ke SPV dengan kelengkapan data EDD untuk approval", isCorrect: true },
+          { id: "h2", text: "Langsung create rekening", isCorrect: false },
+          { id: "h3", text: "Tolak karena NRT", isCorrect: false },
+        ],
+      },
+    ],
+  },
+];
+
+export const stepLabels = {
+  incoming_call: "Panggilan Masuk",
+  ringkasan_panggilan: "Ringkasan Panggilan",
+  kyc_check: "Pemeriksaan KYC",
+  verifikasi_identitas: "Verifikasi Identitas",
+  konfirmasi_data: "Konfirmasi Data",
+  search_cis: "Search CIS",
+  konfirmasi_nasabah: "Konfirmasi Data Nasabah",
+  konfirmasi_nasabah_edd: "Konfirmasi Data + EDD",
+  submit_spv: "Submit ke Supervisor",
+  spv_approval: "Approval Supervisor",
+  ringkasan_transaksi: "Ringkasan Transaksi",
+};
+
+export const stepIcons = {
+  incoming_call: "📞",
+  ringkasan_panggilan: "📋",
+  kyc_check: "🔍",
+  verifikasi_identitas: "🪪",
+  konfirmasi_data: "📝",
+  search_cis: "🔎",
+  konfirmasi_nasabah: "✅",
+  konfirmasi_nasabah_edd: "⚠️",
+  submit_spv: "📤",
+  spv_approval: "👔",
+  ringkasan_transaksi: "🎉",
+};
